@@ -1,0 +1,57 @@
+1.Installation
+ pip install celery
+ pip install redis
+
+
+2 Make a file "celery.py" in main project directory for e.g myprojectname is task 
+3 paste the content in celery.py
+
+import os
+
+from celery import Celery
+
+# Set the default Django settings module for the 'celery' program.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'task.settings')
+
+app = Celery('task')
+
+# Using a string here means the worker doesn't have to serialize
+# the configuration object to child processes.
+# - namespace='CELERY' means all celery-related configuration keys
+#   should have a `CELERY_` prefix.
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Load task modules from all registered Django apps.
+app.autodiscover_tasks()
+
+
+@app.task(bind=True)
+def debug_task(self):
+    print(f'Request: {self.request!r}')
+
+
+
+
+4.go to task/__init__.py file and paste the content
+
+from .celery import app as celery_app
+
+__all__ = ('celery_app',)
+
+
+5.go to the setting.py and paste the content
+
+
+# CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_ACCEPT_CONTENT = ['application/json']
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TASK_SERIALIZER = 'json'
+
+
+
+6.run the celery server 
+  celery -A task worker -l INFO 
+  *task is my project name
+
+
